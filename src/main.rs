@@ -45,6 +45,29 @@ fn show_intro(rb: &RustBox) {
     }
 }
 
+fn draw_playfield(rb: &RustBox, start: point::Point, width: i16, height: i16) {
+    // Draw the four corners
+    rb.print(start.x as usize, start.y as usize, rustbox::RB_NORMAL,
+             Color::White, Color::Black, "╔");
+    rb.print((start.x + width) as usize, start.y as usize, rustbox::RB_NORMAL,
+             Color::White, Color::Black, "╗");
+    rb.print(start.x as usize, (start.y + height) as usize, rustbox::RB_NORMAL,
+             Color::White, Color::Black, "╚");
+    rb.print((start.x + width) as usize, (start.y + height) as usize, rustbox::RB_NORMAL,
+             Color::White, Color::Black, "╝");
+    for x in (start.x + 1)..width {
+        rb.print(x as usize, start.y as usize, rustbox::RB_NORMAL,
+                 Color::White, Color::Black, "═");
+        rb.print(x as usize, (start.y + height) as usize, rustbox::RB_NORMAL,
+                 Color::White, Color::Black, "═");
+    }
+    for y in (start.y + 1)..(height + 1) {
+        rb.print(start.x as usize, y as usize, rustbox::RB_NORMAL,
+                 Color::White, Color::Black, "║");
+        rb.print((start.x + width) as usize, y as usize, rustbox::RB_NORMAL,
+                 Color::White, Color::Black, "║");
+    }
+}
 fn main() {
     let rb = match RustBox::init(Default::default()) {
         Ok(v) => v,
@@ -53,6 +76,7 @@ fn main() {
     show_intro(&rb);
     rb.clear();
     loop {
+        draw_playfield(&rb, point::Point::new(0, 1), (rb.width() - 1) as i16, (rb.height() - 2) as i16);
         rb.present();
         match rb.poll_event(false) {
             Ok(rustbox::Event::KeyEvent(key)) => {
