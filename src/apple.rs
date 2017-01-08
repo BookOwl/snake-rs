@@ -7,3 +7,11 @@ impl Apple {
         Apple { position: position }
     }
 }
+
+pub fn apple_char() -> char {
+    if cfg!(target_os = "macos") {
+        ''
+    } else {
+        '●'
+    }
+}

@@ -89,7 +89,7 @@ fn draw_snake(rb: &RustBox, snake: &player::Snake) {
 fn draw_apple(rb: &RustBox, apple: &apple::Apple) {
     rb.print_char(apple.position.x as usize, apple.position.y as usize,
                   rustbox::RB_BOLD, Color::Red, Color::Black,
-                  '#');
+                  apple::apple_char());
 }
 
 fn game_over(rb: &RustBox) {
