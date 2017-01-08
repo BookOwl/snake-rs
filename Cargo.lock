@@ -2,6 +2,7 @@
 name = "snake"
 version = "0.1.0"
 dependencies = [
+ "fps_clock 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustbox 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -9,6 +10,11 @@ dependencies = [
 [[package]]
 name = "bitflags"
 version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "fps_clock"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -166,6 +172,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [metadata]
 "checksum bitflags 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "a41f80ec2e140d19e789764fdf22d0f2da98fe7e55d26f99db59cb3d2605d327"
+"checksum fps_clock 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "c927ce813ec3660f4481a37ce01b1fb77c9df9b7f3b5d88da8b3ce7dbab8c4ba"
 "checksum gag 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)" = "c606f5c0da18075916377e73de8aec7c140e1b6110a3cf26ae1f47873529b47e"
 "checksum kernel32-sys 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7507624b29483431c0ba2d82aece8ca6cdba9382bff4ddd0f7490560c056098d"
 "checksum libc 0.2.19 (registry+https://github.com/rust-lang/crates.io-index)" = "9e030dc72013ed68994d1b2cbf36a94dd0e58418ba949c4b0db7eeb70a7a6352"
