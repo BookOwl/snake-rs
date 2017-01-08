@@ -93,7 +93,7 @@ fn draw_apple(rb: &RustBox, apple: &apple::Apple) {
 }
 
 fn game_over(rb: &RustBox) {
-    rb.clear();
+    //rb.clear();
     let ascii_art = vec![
 "  ____                         ___                 _",
 " / ___| __ _ _ __ ___   ___   / _ \\__   _____ _ __| |",
@@ -170,7 +170,9 @@ fn main() {
         if move_counter == frames_per_move {
             move_counter = 0;
             let next_pos = snake.next_position();
-            if snake.body.contains(&next_pos) {
+            if snake.body.contains(&next_pos) ||
+               next_pos.x == 0 || next_pos.x + 1 == rb.width() as i16 ||
+               next_pos.y == 1 || next_pos.y + 1 == rb.height() as i16 {
                 game_over(&rb);
             } else if next_pos == apple.position {
                 snake.move_forward_and_eat();
