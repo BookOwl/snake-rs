@@ -92,8 +92,40 @@ fn draw_apple(rb: &RustBox, apple: &apple::Apple) {
                   '#');
 }
 
-fn game_over() {
-    panic!();
+fn game_over(rb: &RustBox) {
+    rb.clear();
+    let ascii_art = vec![
+"  ____                         ___                 _",
+" / ___| __ _ _ __ ___   ___   / _ \\__   _____ _ __| |",
+"| |  _ / _` | '_ ` _ \\ / _ \\ | | | \\ \\ / / _ \\ '__| |",
+"| |_| | (_| | | | | | |  __/ | |_| |\\ V /  __/ |  |_|",
+" \\____|\\__,_|_| |_| |_|\\___|  \\___/  \\_/ \\___|_|  (_)"
+    ];
+    let art_width   = ascii_art[0].len() as i16;
+    let art_height  = ascii_art.len() as i16;
+    let term_width  = rb.width() as i16;
+    let term_height = rb.height() as i16;
+    let start_x     = ((term_width - art_width) / 2) as i16;
+    let start_y     = ((term_height - art_height) / 2) as i16;
+    for (i, y) in (start_y..(start_y + art_height)).enumerate() {
+        rb.print(start_x as usize, y as usize, rustbox::RB_BOLD, Color::Red, Color::Black, ascii_art[i]);
+    };
+    let quit_message = "Hit <esc> to exit.";
+    rb.print(((term_width - quit_message.len() as i16)/2) as usize, (term_height - 1) as usize,
+             rustbox::RB_BOLD, Color::White, Color::Black, quit_message);
+    loop {
+        rb.present();
+        match rb.poll_event(false) {
+            Ok(rustbox::Event::KeyEvent(key)) => {
+                match key {
+                    Key::Esc => { panic!(); },
+                    _ => { }
+                }
+            },
+            Err(e) => panic!("{}", e),
+            _ => { }
+        }
+    }
 }
 
 fn main() {
@@ -105,7 +137,7 @@ fn main() {
     rb.clear();
     let mut score = 0;
     let mut move_counter = 0;
-    let frames_per_move = 10;
+    let frames_per_move = 4;
     let mut snake = player::Snake::new(point::Point::random(5, (rb.width() - 5) as i16,
                                                             5, (rb.height() - 5) as i16),
                                        3, rand::thread_rng().gen());
@@ -139,7 +171,7 @@ fn main() {
             move_counter = 0;
             let next_pos = snake.next_position();
             if snake.body.contains(&next_pos) {
-                game_over();
+                game_over(&rb);
             } else if next_pos == apple.position {
                 snake.move_forward_and_eat();
                 apple = apple::Apple::new(point::Point::random(5, (rb.width() - 5) as i16,
