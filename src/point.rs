@@ -2,7 +2,7 @@ use rand;
 use rand::Rng;
 use std::ops::{Add, Sub};
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Point {
     pub x: i16,
     pub y: i16,

@@ -1,11 +1,13 @@
 extern crate rand;
 extern crate rustbox;
+extern crate fps_clock;
 extern crate snake;
 use std::default::Default;
-use std::process::exit;
+use std::time::Duration;
 use rustbox::{Color, RustBox, Key};
 use rand::Rng;
-use snake::{direction, point, player};
+use snake::{direction, point, player, apple};
+use fps_clock::FpsClock;
 
 fn show_intro(rb: &RustBox) {
     let ascii_art = vec![
@@ -68,6 +70,32 @@ fn draw_playfield(rb: &RustBox, start: point::Point, width: i16, height: i16) {
                  Color::White, Color::Black, "║");
     }
 }
+
+fn draw_score(rb: &RustBox, score: u32) {
+    rb.print(0, 0, rustbox::RB_NORMAL, Color::White, Color::Black, &format!("Score: {}", score));
+}
+
+fn draw_snake(rb: &RustBox, snake: &player::Snake) {
+    rb.print_char(snake.head.x as usize, snake.head.y as usize,
+                  rustbox::RB_BOLD, Color::Green, Color::Black,
+                  '█');
+    for segment in &snake.body {
+        rb.print_char(segment.x as usize, segment.y as usize,
+                      rustbox::RB_BOLD, Color::Green, Color::Black,
+                      '▒');
+    }
+}
+
+fn draw_apple(rb: &RustBox, apple: &apple::Apple) {
+    rb.print_char(apple.position.x as usize, apple.position.y as usize,
+                  rustbox::RB_BOLD, Color::Red, Color::Black,
+                  '#');
+}
+
+fn game_over() {
+    panic!();
+}
+
 fn main() {
     let rb = match RustBox::init(Default::default()) {
         Ok(v) => v,
@@ -75,19 +103,54 @@ fn main() {
     };
     show_intro(&rb);
     rb.clear();
+    let mut score = 0;
+    let mut move_counter = 0;
+    let frames_per_move = 10;
+    let mut snake = player::Snake::new(point::Point::random(5, (rb.width() - 5) as i16,
+                                                            5, (rb.height() - 5) as i16),
+                                       3, rand::thread_rng().gen());
+    let mut apple = apple::Apple::new(point::Point::random(5, (rb.width() - 5) as i16,
+                                                           5, (rb.height() - 5) as i16));
+    // Main game loop
+    let mut clock = FpsClock::new(30); // Run at 30 FPS
     loop {
+        rb.clear();
         draw_playfield(&rb, point::Point::new(0, 1), (rb.width() - 1) as i16, (rb.height() - 2) as i16);
+        // rb.present() MUST be called after all the drawing functions have been called
+        draw_score(&rb, score);
+        draw_apple(&rb, &apple);
+        draw_snake(&rb, &snake);
         rb.present();
-        match rb.poll_event(false) {
+        match rb.peek_event(Duration::new(0, 500), false) {
             Ok(rustbox::Event::KeyEvent(key)) => {
                 match key {
-                    Key::Char('q') => { break; },
-                    Key::Esc => { break; },
+                    Key::Esc   => { break; },
+                    Key::Up    => { snake.direction = direction::Direction::Down; },
+                    Key::Down  => { snake.direction = direction::Direction::Up; },
+                    Key::Left  => { snake.direction = direction::Direction::Left; },
+                    Key::Right => { snake.direction = direction::Direction::Right; },
                     _ => { }
                 }
             },
             Err(e) => panic!("{}", e),
             _ => { }
+        };
+        if move_counter == frames_per_move {
+            move_counter = 0;
+            let next_pos = snake.next_position();
+            if snake.body.contains(&next_pos) {
+                game_over();
+            } else if next_pos == apple.position {
+                snake.move_forward_and_eat();
+                apple = apple::Apple::new(point::Point::random(5, (rb.width() - 5) as i16,
+                                                               5, (rb.height() - 5) as i16));
+                score += 1;
+            } else {
+                snake.move_forward();
+            }
+        } else {
+            move_counter += 1;
         }
+        clock.tick();
     }
 }
