@@ -4,6 +4,9 @@ extern crate fps_clock;
 extern crate snake;
 use std::default::Default;
 use std::time::Duration;
+use std::io;
+use std::io::prelude::*;
+use std::fs::File;
 use rustbox::{Color, RustBox, Key};
 use rand::Rng;
 use snake::{direction, point, player, apple};
@@ -71,8 +74,9 @@ fn draw_playfield(rb: &RustBox, start: point::Point, width: i16, height: i16) {
     }
 }
 
-fn draw_score(rb: &RustBox, score: u32) {
-    rb.print(0, 0, rustbox::RB_NORMAL, Color::White, Color::Black, &format!("Score: {}", score));
+fn draw_score(rb: &RustBox, score: u32, highscore: u32) {
+    rb.print(0, 0, rustbox::RB_NORMAL, Color::White, Color::Black,
+        &format!("Score: {} Highscore: {}", score, highscore));
 }
 
 fn draw_snake(rb: &RustBox, snake: &player::Snake) {
@@ -95,11 +99,11 @@ fn draw_apple(rb: &RustBox, apple: &apple::Apple) {
 fn game_over(rb: &RustBox) {
     //rb.clear();
     let ascii_art = vec![
-"  ____                         ___                 _",
-" / ___| __ _ _ __ ___   ___   / _ \\__   _____ _ __| |",
-"| |  _ / _` | '_ ` _ \\ / _ \\ | | | \\ \\ / / _ \\ '__| |",
-"| |_| | (_| | | | | | |  __/ | |_| |\\ V /  __/ |  |_|",
-" \\____|\\__,_|_| |_| |_|\\___|  \\___/  \\_/ \\___|_|  (_)"
+    "  ____                         ___                 _",
+    " / ___| __ _ _ __ ___   ___   / _ \\__   _____ _ __| |",
+    "| |  _ / _` | '_ ` _ \\ / _ \\ | | | \\ \\ / / _ \\ '__| |",
+    "| |_| | (_| | | | | | |  __/ | |_| |\\ V /  __/ |  |_|",
+    " \\____|\\__,_|_| |_| |_|\\___|  \\___/  \\_/ \\___|_|  (_)"
     ];
     let art_width   = ascii_art[0].len() as i16;
     let art_height  = ascii_art.len() as i16;
@@ -128,7 +132,21 @@ fn game_over(rb: &RustBox) {
     }
 }
 
+fn get_highscore(path: &str) -> Result<u32, io::Error> {
+    let mut f = File::open(path)?;
+    let mut buf = String::new();
+    f.read_to_string(&mut buf)?;
+    Ok(buf.parse().unwrap())
+}
+
+fn write_highscore(path: &str, score: u32) -> io::Result<()> {
+    let mut f = File::create(path)?;
+    write!(f, "{:?}", score)?;
+    Ok(())
+}
+
 fn main() {
+    let highscore_file = "/usr/local/.snake_highscore";
     let rb = match RustBox::init(Default::default()) {
         Ok(v) => v,
         Err(e) => panic!("{}", e),
@@ -136,6 +154,7 @@ fn main() {
     show_intro(&rb);
     rb.clear();
     let mut score = 0;
+    let mut highscore = get_highscore(highscore_file).unwrap_or(0);
     let mut move_counter = 0;
     let frames_per_move = 4;
     let mut snake = player::Snake::new(point::Point::random(5, (rb.width() - 5) as i16,
@@ -149,7 +168,7 @@ fn main() {
         rb.clear();
         draw_playfield(&rb, point::Point::new(0, 1), (rb.width() - 1) as i16, (rb.height() - 2) as i16);
         // rb.present() MUST be called after all the drawing functions have been called
-        draw_score(&rb, score);
+        draw_score(&rb, score, highscore);
         draw_apple(&rb, &apple);
         draw_snake(&rb, &snake);
         rb.present();
@@ -179,6 +198,10 @@ fn main() {
                 apple = apple::Apple::new(point::Point::random(5, (rb.width() - 5) as i16,
                                                                5, (rb.height() - 5) as i16));
                 score += 1;
+                if score > highscore {
+                    highscore = score;
+                    write_highscore(highscore_file, highscore).unwrap();
+                }
             } else {
                 snake.move_forward();
             }
