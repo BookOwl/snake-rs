@@ -146,7 +146,7 @@ fn write_highscore(path: &str, score: u32) -> io::Result<()> {
 }
 
 fn main() {
-    let highscore_file = "/usr/local/.snake_highscore";
+    let highscore_file = "snake_highscore";
     let rb = match RustBox::init(Default::default()) {
         Ok(v) => v,
         Err(e) => panic!("{}", e),
