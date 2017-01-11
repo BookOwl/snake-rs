@@ -7,6 +7,7 @@ use std::time::Duration;
 use std::io;
 use std::io::prelude::*;
 use std::fs::File;
+use std::env;
 use rustbox::{Color, RustBox, Key};
 use rand::Rng;
 use snake::{direction, point, player, apple};
@@ -132,6 +133,10 @@ fn game_over(rb: &RustBox) {
     }
 }
 
+fn get_highscore_path() -> String {
+        format!("{}/{}", env::home_dir().unwrap().display(), ".snake_highscore")
+}
+
 fn get_highscore(path: &str) -> Result<u32, io::Error> {
     let mut f = File::open(path)?;
     let mut buf = String::new();
@@ -146,7 +151,8 @@ fn write_highscore(path: &str, score: u32) -> io::Result<()> {
 }
 
 fn main() {
-    let highscore_file = "snake_highscore";
+    //let log = File::create("log").unwrap();
+    let highscore_file = get_highscore_path();
     let rb = match RustBox::init(Default::default()) {
         Ok(v) => v,
         Err(e) => panic!("{}", e),
@@ -154,7 +160,7 @@ fn main() {
     show_intro(&rb);
     rb.clear();
     let mut score = 0;
-    let mut highscore = get_highscore(highscore_file).unwrap_or(0);
+    let mut highscore = get_highscore(&highscore_file).unwrap_or(0);
     let mut move_counter = 0;
     let frames_per_move = 4;
     let mut snake = player::Snake::new(point::Point::random(5, (rb.width() - 5) as i16,
@@ -183,7 +189,10 @@ fn main() {
                     _ => { }
                 }
             },
-            Err(e) => panic!("{}", e),
+            Err(_) => {
+                //log.write(format!("{}\n", e).as_bytes()).unwrap();
+                break;
+            },
             _ => { }
         };
         if move_counter == frames_per_move {
@@ -200,7 +209,12 @@ fn main() {
                 score += 1;
                 if score > highscore {
                     highscore = score;
-                    write_highscore(highscore_file, highscore).unwrap();
+                    match write_highscore(&highscore_file, highscore) {
+                        Ok(_) => {},
+                        Err(_) => {
+                            //log.write(format!("{:?} {}\n", highscore_file, e).as_bytes()).unwrap();
+                        }
+                    };
                 }
             } else {
                 snake.move_forward();
