@@ -182,10 +182,10 @@ fn main() {
             Ok(rustbox::Event::KeyEvent(key)) => {
                 match key {
                     Key::Esc   => { break; },
-                    Key::Up    => { snake.direction = direction::Direction::Down; },
-                    Key::Down  => { snake.direction = direction::Direction::Up; },
-                    Key::Left  => { snake.direction = direction::Direction::Left; },
-                    Key::Right => { snake.direction = direction::Direction::Right; },
+                    Key::Up    => if snake.direction != direction::Direction::Up { snake.direction = direction::Direction::Down; },
+                    Key::Down  => if snake.direction != direction::Direction::Down { snake.direction = direction::Direction::Up; },
+                    Key::Left  => if snake.direction != direction::Direction::Right { snake.direction = direction::Direction::Left; },
+                    Key::Right => if snake.direction != direction::Direction::Left { snake.direction = direction::Direction::Right; },
                     _ => { }
                 }
             },

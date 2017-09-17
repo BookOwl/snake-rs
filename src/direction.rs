@@ -1,7 +1,7 @@
 use point;
 use rand::{Rand, Rng};
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Direction {
     Up,
     Down,
